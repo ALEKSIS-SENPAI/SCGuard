@@ -4,6 +4,8 @@ Tray app for Windows. Turns off Mullvad when Star Citizen (or the RSI Launcher) 
 
 EAC hates VPNs and I got sick of alt-tabbing to toggle Mullvad every time. So this exists now.
 
+**There is no .exe download.** You build it yourself, takes like 30 seconds. See [Building](#building) below.
+
 ## How it works
 
 Checks every 2 seconds if `StarCitizen.exe` or `RSI Launcher.exe` is running. If either one is open, it runs `mullvad disconnect`. When both are closed, it runs `mullvad connect`. Thats the whole app.

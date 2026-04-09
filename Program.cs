@@ -30,7 +30,7 @@ namespace SCGuard
 
     class SCGuardContext : ApplicationContext
     {
-        // FIX #1: DestroyIcon P/Invoke to prevent GDI handle leaks
+        // need this to free icons properly
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyIcon(IntPtr hIcon);
 
@@ -88,8 +88,7 @@ namespace SCGuard
         {
             if (_state == GuardState.ManualOverride) return;
 
-            // FIX #2: Dispose Process objects returned by GetProcessesByName
-            // to prevent OS handle leaks (called every 2 seconds)
+            // dispose these or we leak handles every 2 seconds lol
             bool scRunning = IsAnyProcessRunning(SC_PROCESS_NAMES);
 
             if (scRunning && !_scWasRunning)       { _scWasRunning = true;  ApplyState(GuardState.SCMode); }
@@ -221,7 +220,7 @@ namespace SCGuard
 
         private enum IconStyle { Protected, SCMode, Override }
 
-        // Clone the icon and free the unmanaged HICON so nothing leaks.
+        // icon from bitmap without leaking the handle
         private static Icon RenderIcon(IconStyle style)
         {
             const int size = 32;
@@ -257,7 +256,7 @@ namespace SCGuard
             g.DrawString(label, font, shadow, new RectangleF(1, 2, size, size), sf);
             g.DrawString(label, font, white,  new RectangleF(0, 1, size, size), sf);
 
-            // Correct pattern: get handle, wrap, clone (managed copy), free handle
+            // clone it before destroying the handle or it goes poof
             IntPtr hIcon = bmp.GetHicon();
             using var tmp = Icon.FromHandle(hIcon);
             var result = (Icon)tmp.Clone();
